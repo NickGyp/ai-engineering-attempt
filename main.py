@@ -1,10 +1,16 @@
 from fastapi import FastAPI
 from pydantic import BaseModel
+from transformers import pipeline
 
 app = FastAPI()
 class TextRequest(BaseModel):
     text: str
     language: str = "en"
+
+classifier = pipeline(
+    task = "sentiment-analysis",
+    model = "distilbert/distilbert-base-uncased-finetuned-sst-2-english"
+)
 
 @app.get("/")
 def home():
@@ -32,4 +38,14 @@ def analyze(request: TextRequest):
         "text": request.text,
         "language": request.language,
         "word_count": len(words)
+    }
+
+@app.post("/sentiment")
+def sentiment(request: TextRequest):
+    result = classifier(request.text)[0]
+
+    return {
+        "text": request.text,
+        "sentiment": result["label"],
+        "score": result["score"]
     }
