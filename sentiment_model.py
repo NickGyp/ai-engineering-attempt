@@ -6,7 +6,11 @@ classifier = pipeline(
 )
 
 def predict_sentiment(text: str):
-    result = classifier(text)[0]
+    result = classifier(
+        text,
+        truncation=True,
+        max_length=512
+    )[0]
 
     return {
         "sentiment": result["label"],
